@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +41,8 @@ public class BlankFragment extends Fragment {
     private String strask = "購入";
     private double max;
     private double min;
+    private String Maxexchange;
+    private String Minexchange;
 
     private OnFragmentInteractionListener mListener;
     private TextView tv1;
@@ -119,6 +122,10 @@ public class BlankFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                int result = (int)(max - min);//差額
+                Toast.makeText(getActivity(), Minexchange + "で購入して" + Maxexchange + "で売却すると" + String.format("%1$,3d円", result) + "の利益" ,Toast.LENGTH_LONG).show();
+                Log.v("max", Maxexchange);
+                //Log.v("min", Minexchange);
                 onResume();
 
             }
@@ -141,10 +148,12 @@ public class BlankFragment extends Fragment {
                         json = new JSONObject(list);
                         double buy = 0;//売却値
                         double ask = 0;//購入値
+                        String exchange = "";//取引所
                         switch (i){
                             case 0:
                                 buy = Double.parseDouble(json.getString("bid"));
                                 ask = Double.parseDouble(json.getString("ask"));
+                                exchange = "Coincheck";
                                 //Coincheck
                                 tv1.setText(strbuy + String.format("%1$,3d円", (int)buy));
                                 tv2.setText(strask + String.format("%1$,3d円", (int)ask));
@@ -152,6 +161,7 @@ public class BlankFragment extends Fragment {
                             case 1:
                                 buy = Double.parseDouble(json.getString("best_bid"));
                                 ask = Double.parseDouble(json.getString("best_ask"));
+                                exchange = "bitFlyer";
                                 //bitFlyer
                                 tv3.setText(strbuy + String.format("%1$,3d円", (int)buy));
                                 tv4.setText(strask + String.format("%1$,3d円", (int)ask));
@@ -159,6 +169,7 @@ public class BlankFragment extends Fragment {
                             case 2:
                                 buy = Double.parseDouble(json.getString("bid"));
                                 ask = Double.parseDouble(json.getString("ask"));
+                                exchange = "Zaif";
                                 //Zaif
                                 tv5.setText(strbuy + String.format("%1$,3d円", (int)buy));
                                 tv6.setText(strask + String.format("%1$,3d円", (int)ask));
@@ -166,6 +177,7 @@ public class BlankFragment extends Fragment {
                             case 3:
                                 buy = Double.parseDouble(json.getString("buy"));
                                 ask = Double.parseDouble(json.getString("sell"));
+                                exchange = "BtcBox";
                                 //BtcBox
                                 tv7.setText(strbuy + String.format("%1$,3d円", (int)buy));
                                 tv8.setText(strask + String.format("%1$,3d円", (int)ask));
@@ -173,6 +185,7 @@ public class BlankFragment extends Fragment {
                             case 4:
                                 buy = Double.parseDouble(json.getString("market_bid"));
                                 ask = Double.parseDouble(json.getString("market_ask"));
+                                exchange = "Quoinex";
                                 //Quoinex
                                 tv9.setText(strbuy + String.format("%1$,3d円", (int)buy));
                                 tv10.setText(strask + String.format("%1$,3d円", (int)ask));
@@ -181,6 +194,7 @@ public class BlankFragment extends Fragment {
                                 json = new JSONObject(json.getString("data"));
                                 buy = Double.parseDouble(json.getString("buy"));
                                 ask = Double.parseDouble(json.getString("sell"));
+                                exchange = "bitbank";
                                 //bitbank
                                 tv11.setText(strbuy + String.format("%1$,3d円", (int)buy));
                                 tv12.setText(strask + String.format("%1$,3d円", (int)ask));
@@ -188,7 +202,7 @@ public class BlankFragment extends Fragment {
                             default:
                                 break;
                         }
-                        CheckCoin(buy, ask);
+                        CheckCoin(buy, ask, exchange);
                         i++;
                     }
 
@@ -213,12 +227,20 @@ public class BlankFragment extends Fragment {
         jsonLoader.execute(strings);
     }
 
-    private void CheckCoin(double buy, double ask) {
-        if (max < buy){
+    private void CheckCoin(double buy, double ask, String exchange) {
+        if(max == 0.0 && min == 0.0){
             max = buy;
+            min = ask;
+            Maxexchange = exchange;
+            Minexchange = exchange;
+        }
+        if (max < buy){
+            this.max = buy;
+            this.Maxexchange = exchange;
         }
         if(ask < min){
-            min = ask;
+            this.min = ask;
+            this.Minexchange = exchange;
         }
     }
 
